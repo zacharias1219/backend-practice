@@ -5,18 +5,28 @@ import db from '../db.js';
 
 const router = express.Router();
 
-router.post("/register", (req, res) => {
+router.post("/register", async (req, res) => {
     const { username, password } = req.body
 
     const hashedPassword = bcrypt.hashSync(password, 10)
     console.log(hashedPassword)
 
     try {
-        const insertUser = db.prepare(`INSERT INTO user (username, password) VALUES (?, ?)`)
-        const result = insertUser.run(username, hashedPassword)
+        const user = await prisma.user.create({
+            data: {
+                username,
+                password: hashedPassword
+            }
+        })
+
         const defaultTodo = `Hello :) Add your first Todo!`
-        const insertTodo = db.prepare(`INSERT INTO todos(user_id, task) VALUES(? , ?)`)
-        insertTodo.run(result.lastInsertRowid, defaultTodo)
+        await prisma.todo.create({
+            data: {
+                task: defaultTodo,
+                user: user.id
+            }
+        })
+
 
         const token = jwt.sign({id: result.lastInsertRowid}, process.env.JWT_SECRET, {expiresIn: "24h"})
         res.json({ token })
@@ -27,12 +37,15 @@ router.post("/register", (req, res) => {
     res.sendStatus(201)
 })
 
-router.post("/login", (req, res) => {
+router.post("/login", async (req, res) => {
     const { username, password } = req.body
 
     try {
-        const getUser = db.prepare(` SELECT * FROM user WHERE username = ?`)
-        const user = getUser.get(username)
+        const user = await prisma.user.findUnique({
+            where: {
+                username: username
+            }
+        })
 
         if (!user) {
             return res.status(404).send({message: "User not found"})

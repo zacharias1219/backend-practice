@@ -12,9 +12,12 @@
   "license": "ISC",
   "description": "Dockerized todo application with authentication",
   "dependencies": {
+    "@prisma/client": "^6.2.1",
     "bcryptjs": "^2.4.3",
     "express": "^4.21.2",
     "jsonwebtoken": "^9.0.2",
+    "pg": "^8.13.1",
+    "prisma": "^6.2.1",
     "sqlite": "^5.1.1"
   },
   "devDependencies": {
