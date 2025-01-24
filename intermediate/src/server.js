@@ -3,6 +3,7 @@ import path, { dirname } from "path";
 import { fileURLToPath } from "url";
 import authRouter from "./routes/authRoutes.js"
 import todoRouter from "./routes/todoRoutes.js"
+import authMiddleware from "./middleware/authMiddleware.js";
 const PORT = process.env.PORT || 8000
 const app = express()
 
@@ -13,7 +14,7 @@ const __dirname = dirname(__filename)
 app.use(express.static(path.join(__dirname, "../public")))
 
 app.use("/auth", authRouter)
-app.use("/todos", todoRouter)
+app.use("/todos", authMiddleware, todoRouter)
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`)
